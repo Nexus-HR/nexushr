@@ -4,6 +4,7 @@ package com.nexushr.spring.nexushr.service;
 import com.nexushr.spring.nexushr.model.Empleado;
 import com.nexushr.spring.nexushr.repository.EmpleadoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
@@ -18,7 +19,7 @@ public class EmpleadoService {
         return empleadoRepository.findAll();
     }
 
-    public Optional<Empleado> obtenerEmpleadoPorId(Long id) {
+    public Optional<Empleado> obtenerEmpleadoPorId(@NonNull Long id) {
         return empleadoRepository.findById(id);
     }
 
@@ -29,7 +30,7 @@ public class EmpleadoService {
         return empleadoRepository.save(empleado);
     }
 
-    public void eliminarEmpleado(Long id) {
+    public void eliminarEmpleado(@NonNull Long id) {
         empleadoRepository.deleteById(id);
     }
 

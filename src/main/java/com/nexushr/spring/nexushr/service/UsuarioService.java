@@ -4,6 +4,7 @@ package com.nexushr.spring.nexushr.service;
 import com.nexushr.spring.nexushr.model.Usuario;
 import com.nexushr.spring.nexushr.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import java.util.Optional;
 
@@ -31,7 +32,7 @@ public class UsuarioService {
         return Optional.empty();
     }
 
-    public Optional<Usuario> obtenerUsuarioPorId(Long id) {
+    public Optional<Usuario> obtenerUsuarioPorId(@NonNull Long id) {
         return usuarioRepository.findById(id);
     }
 }
