@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estadísticas - NexusHR</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            color: #333;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .animated-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            background: linear-gradient(-45deg, #1a2a6c, #2a3a7c, #3a4a8c, #4a5a9c);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: floatAround 20s infinite linear;
+        }
+
+        @keyframes floatAround {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            100% { transform: translate(100px, 100px) rotate(360deg); }
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px 40px;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            position: relative;
+            z-index: 10;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #ff7e5f, #feb47b);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-weight: bold;
+            color: white;
+            font-size: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .logo-text {
+            font-size: 28px;
+            font-weight: 800;
+            color: #1a2a6c;
+            letter-spacing: 0.5px;
+        }
+
+        .user-info {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .welcome {
+            color: #666;
+        }
+
+        .user-name {
+            font-weight: bold;
+            color: #1a2a6c;
+        }
+
+        .btn-logout {
+            background: linear-gradient(135deg, #ff6b6b, #ff5252);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+
+        .btn-logout:hover {
+            background: linear-gradient(135deg, #ff5252, #ff6b6b);
+            transform: translateY(-2px);
+        }
+
+        .btn-back {
+            background: linear-gradient(135deg, #64748b, #475569);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            display: inline-block;
+            margin-right: 15px;
+        }
+
+        .btn-back:hover {
+            background: linear-gradient(135deg, #475569, #64748b);
+            transform: translateY(-2px);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+            position: relative;
+            z-index: 5;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .card h2 {
+            color: #1a2a6c;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 10px;
+        }
+
+        .employee-selector {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 15px;
+            margin-bottom: 30px;
+            align-items: end;
+        }
+
+        .selector-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #1a2a6c;
+        }
+
+        .selector-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e1e1;
+            border-radius: 8px;
+            font-size: 0.9em;
+            background: #f8f9fa;
+        }
+
+        .btn-generate {
+            background: linear-gradient(135deg, #1a2a6c, #2a3a7c);
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-generate:hover {
+            background: linear-gradient(135deg, #2a3a7c, #3a4a8c);
+            transform: translateY(-2px);
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .chart-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .employee-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #1a2a6c, #2a3a7c);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin: 5px 0;
+        }
+
+        .stat-label {
+            font-size: 0.8em;
+            opacity: 0.9;
+        }
+
+        .performance-indicators {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .indicator {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #1a2a6c;
+        }
+
+        .indicator-info h4 {
+            margin: 0;
+            color: #1a2a6c;
+        }
+
+        .indicator-info p {
+            margin: 0;
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .indicator-value {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #1a2a6c;
+        }
+
+        @media (max-width: 768px) {
+            .employee-selector {
+                grid-template-columns: 1fr;
+            }
+            
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .employee-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .performance-indicators {
+                grid-template-columns: 1fr;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="animated-bg"></div>
+    <div class="particles" id="particles"></div>
+
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon">N</div>
+                <div class="logo-text">NexusHR</div>
+            </div>
+            <div class="user-info">
+                <div class="welcome">
+                    Bienvenido, <span class="user-name" th:text="${usuario.nombre + ' ' + usuario.apellido}">Usuario</span>
+                </div>
+                <a href="/dashboard" class="btn-back">← Volver</a>
+                <a href="/auth/logout" class="btn-logout">Cerrar Sesión</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="card">
+            <h2><i class="fas fa-chart-line"></i> Estadísticas de Desempeño</h2>
+            
+            <div class="employee-selector">
+                <div class="selector-group">
+                    <label>Seleccionar Empleado</label>
+                    <select id="employeeSelect">
+                        <option value="">-- Selecciona un empleado --</option>
+                        <option th:each="empleado : ${empleados}" th:value="${empleado.id}" th:text="${empleado.nombre + ' ' + empleado.apellido}"></option>
+                    </select>
+                </div>
+                <button class="btn-generate" onclick="generarEstadisticas()">
+                    <i class="fas fa-chart-bar"></i> Generar Gráfica
+                </button>
+            </div>
+
+            <div class="employee-stats" id="employeeStats" style="display: none;">
+                <div class="stat-card">
+                    <div class="stat-value">8.7</div>
+                    <div class="stat-label">Puntuación</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">94%</div>
+                    <div class="stat-label">Eficiencia</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">12</div>
+                    <div class="stat-label">Proyectos</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">98%</div>
+                    <div class="stat-label">Asistencia</div>
+                </div>
+            </div>
+
+            <div class="charts-grid">
+                <div class="chart-container">
+                    <canvas id="performanceChart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <canvas id="skillsChart"></canvas>
+                </div>
+            </div>
+
+            <div class="performance-indicators">
+                <div class="indicator">
+                    <div class="indicator-info">
+                        <h4>Productividad</h4>
+                        <p>Tareas completadas vs asignadas</p>
+                    </div>
+                    <div class="indicator-value">92%</div>
+                </div>
+                <div class="indicator">
+                    <div class="indicator-info">
+                        <h4>Calidad</h4>
+                        <p>Errores por cada 100 tareas</p>
+                    </div>
+                    <div class="indicator-value">2.1%</div>
+                </div>
+                <div class="indicator">
+                    <div class="indicator-info">
+                        <h4>Colaboración</h4>
+                        <p>Participación en equipos</p>
+                    </div>
+                    <div class="indicator-value">88%</div>
+                </div>
+                <div class="indicator">
+                    <div class="indicator-info">
+                        <h4>Innovación</h4>
+                        <p>Propuestas implementadas</p>
+                    </div>
+                    <div class="indicator-value">7</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2><i class="fas fa-trending-up"></i> Comparativa por Departamento</h2>
+            <div class="chart-container">
+                <canvas id="comparisonChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            for (let i = 0; i < 10; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.width = Math.random() * 15 + 5 + 'px';
+                particle.style.height = particle.style.width;
+                particle.style.left = Math.random() * 100 + 'vw';
+                particle.style.top = Math.random() * 100 + 'vh';
+                particle.style.animationDelay = Math.random() * 20 + 's';
+                particle.style.animationDuration = (Math.random() * 20 + 10) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        function generarEstadisticas() {
+            const employeeSelect = document.getElementById('employeeSelect');
+            const employeeStats = document.getElementById('employeeStats');
+            
+            if (employeeSelect.value) {
+                employeeStats.style.display = 'grid';
+                alert('Gráfica generada para: ' + employeeSelect.options[employeeSelect.selectedIndex].text);
+            } else {
+                alert('Por favor selecciona un empleado');
+            }
+        }
+
+        // Gráfica de desempeño
+        const performanceCtx = document.getElementById('performanceChart').getContext('2d');
+        const performanceChart = new Chart(performanceCtx, {
+            type: 'line',
+            data: {
+                labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'],
+                datasets: [{
+                    label: 'Desempeño Mensual',
+                    data: [7.8, 8.2, 8.5, 8.7, 8.6, 8.9],
+                    borderColor: '#1a2a6c',
+                    backgroundColor: 'rgba(26, 42, 108, 0.1)',
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Evolución del Desempeño'
+                    }
+                },
+                scales: {
+                    y: {
+                        min: 7,
+                        max: 10
+                    }
+                }
+            }
+        });
+
+        // Gráfica de habilidades
+        const skillsCtx = document.getElementById('skillsChart').getContext('2d');
+        const skillsChart = new Chart(skillsCtx, {
+            type: 'radar',
+            data: {
+                labels: ['Liderazgo', 'Comunicación', 'Técnica', 'Creatividad', 'Organización', 'Resolución'],
+                datasets: [{
+                    label: 'Habilidades',
+                    data: [8, 9, 7, 8, 9, 8],
+                    backgroundColor: 'rgba(26, 42, 108, 0.2)',
+                    borderColor: '#1a2a6c',
+                    pointBackgroundColor: '#1a2a6c'
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Perfil de Habilidades'
+                    }
+                },
+                scales: {
+                    r: {
+                        min: 0,
+                        max: 10
+                    }
+                }
+            }
+        });
+
+        // Gráfica comparativa
+        const comparisonCtx = document.getElementById('comparisonChart').getContext('2d');
+        const comparisonChart = new Chart(comparisonCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Ventas', 'Tecnología', 'RRHH', 'Marketing'],
+                datasets: [{
+                    label: 'Promedio Desempeño',
+                    data: [8.2, 8.7, 8.4, 7.9],
+                    backgroundColor: [
+                        'rgba(26, 42, 108, 0.8)',
+                        'rgba(42, 58, 124, 0.8)',
+                        'rgba(58, 74, 140, 0.8)',
+                        'rgba(74, 90, 156, 0.8)'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Comparativa por Departamento'
+                    }
+                }
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            createParticles();
+        });
+    </script>
+</body>
+</html>

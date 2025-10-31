@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexusHR - Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            color: #333;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Fondo animado suave */
+        .animated-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            background: linear-gradient(-45deg, #1a2a6c, #2a3a7c, #3a4a8c, #4a5a9c);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Partículas flotantes */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: floatAround 20s infinite linear;
+        }
+
+        @keyframes floatAround {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            100% { transform: translate(100px, 100px) rotate(360deg); }
+        }
+
+        /* Header */
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px 40px;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            position: relative;
+            z-index: 10;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            animation: headerSlideDown 0.8s ease-out forwards;
+        }
+
+        @keyframes headerSlideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #ff7e5f, #feb47b);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-weight: bold;
+            color: white;
+            font-size: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .logo-text {
+            font-size: 28px;
+            font-weight: 800;
+            color: #1a2a6c;
+            letter-spacing: 0.5px;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-3px); }
+        }
+
+        .user-info {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .welcome {
+            color: #666;
+        }
+
+        .user-name {
+            font-weight: bold;
+            color: #1a2a6c;
+        }
+
+        /* Botón Cerrar Sesión */
+        .btn-logout {
+            background: linear-gradient(135deg, #ff6b6b, #ff5252);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            display: inline-block;
+            position: relative;
+            overflow: hidden;
+            animation: btnFadeIn 0.8s ease-out 1.1s forwards;
+            opacity: 0;
+            transform: translateY(20px);
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+
+        .btn-logout::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn-logout:hover::before {
+            left: 100%;
+        }
+
+        .btn-logout:hover {
+            background: linear-gradient(135deg, #ff5252, #ff6b6b);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
+        }
+
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+            position: relative;
+            z-index: 5;
+            animation: containerFadeIn 1s ease-out 0.3s forwards;
+            opacity: 0;
+        }
+
+        @keyframes containerFadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        /* Cards */
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            animation: cardSlideUp 0.6s ease-out forwards;
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        @keyframes cardSlideUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card:nth-child(1) { animation-delay: 0.4s; }
+        .card:nth-child(2) { animation-delay: 0.6s; }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .card h2 {
+            color: #1a2a6c;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 10px;
+        }
+
+        /* Gestión Rápida */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .action-item {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            animation: actionItemFadeIn 0.8s ease-out forwards;
+            opacity: 0;
+            transform: translateY(20px);
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        @keyframes actionItemFadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .action-item:nth-child(1) { animation-delay: 0.8s; }
+        .action-item:nth-child(2) { animation-delay: 0.9s; }
+        .action-item:nth-child(3) { animation-delay: 1.0s; }
+        .action-item:nth-child(4) { animation-delay: 1.1s; }
+
+        .action-item:hover {
+            transform: translateY(-5px);
+            border-color: #1a2a6c;
+            box-shadow: 0 10px 25px rgba(26, 42, 108, 0.2);
+            background: linear-gradient(135deg, #ffffff, #f8f9fa);
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .action-icon {
+            font-size: 2em;
+            margin-bottom: 10px;
+            color: #1a2a6c;
+            transition: all 0.3s ease;
+        }
+
+        .action-item:hover .action-icon {
+            transform: scale(1.1);
+        }
+
+        .action-text h3 {
+            color: #333;
+            margin-bottom: 5px;
+            font-size: 1em;
+        }
+
+        .action-text p {
+            color: #666;
+            font-size: 0.8em;
+        }
+
+        /* Formularios */
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+            animation: formGroupSlide 0.6s ease-out forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        @keyframes formGroupSlide {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .form-group:nth-child(1) { animation-delay: 0.5s; }
+        .form-group:nth-child(2) { animation-delay: 0.6s; }
+        .form-group:nth-child(3) { animation-delay: 0.7s; }
+        .form-group:nth-child(4) { animation-delay: 0.8s; }
+        .form-group:nth-child(5) { animation-delay: 0.9s; }
+        .form-group:nth-child(6) { animation-delay: 1.0s; }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #1a2a6c;
+            font-size: 0.9em;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e1e1;
+            border-radius: 8px;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #1a2a6c;
+            background: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(26, 42, 108, 0.2);
+        }
+
+        /* Botón primario */
+        .btn-primary {
+            background: linear-gradient(135deg, #1a2a6c, #2a3a7c);
+            color: white;
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            animation: btnFadeIn 0.8s ease-out 1.1s forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #2a3a7c, #3a4a8c);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        @keyframes btnFadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.8em;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+            transform: scale(1.05);
+        }
+
+        /* Barra de búsqueda - NUEVO */
+        .search-container {
+            margin-bottom: 25px;
+            position: relative;
+            animation: fadeIn 0.8s ease-out 0.9s forwards;
+            opacity: 0;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 45px 12px 15px;
+            border: 2px solid #e1e1e1;
+            border-radius: 25px;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #1a2a6c;
+            background: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(26, 42, 108, 0.2);
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #64748b;
+            cursor: pointer;
+        }
+
+        /* Sección empleados */
+        .employees-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            animation: sectionSlideUp 0.8s ease-out 0.8s forwards;
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        @keyframes sectionSlideUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .section-title {
+            color: #1a2a6c;
+            font-size: 1.8em;
+        }
+
+        .employees-count {
+            background: #1a2a6c;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        /* Tabla */
+        .employees-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            animation: tableFadeIn 1s ease-out 1s forwards;
+            opacity: 0;
+        }
+
+        @keyframes tableFadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+
+        .employees-table th,
+        .employees-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #e1e1e1;
+        }
+
+        .employees-table th {
+            background: #f8f9fa;
+            font-weight: bold;
+            color: #1a2a6c;
+            border-bottom: 2px solid #e1e1e1;
+        }
+
+        .employees-table tr {
+            transition: all 0.3s ease;
+        }
+
+        .employees-table tr:hover td {
+            background: #f8f9fa;
+            transform: scale(1.01);
+        }
+
+        /* Estados de empleados */
+        .status-active {
+            background: #d4edda;
+            color: #155724;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            font-weight: bold;
+            display: inline-block;
+        }
+
+        /* Alertas */
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Estado vacío */
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            animation: fadeIn 0.8s ease-out 1s forwards;
+            opacity: 0;
+        }
+
+        .empty-state i {
+            font-size: 3em;
+            margin-bottom: 15px;
+            opacity: 0.5;
+            color: #1a2a6c;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .quick-actions {
+                grid-template-columns: 1fr;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+            
+            .employees-table {
+                font-size: 0.8em;
+            }
+            
+            .employees-table th,
+            .employees-table td {
+                padding: 10px 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="animated-bg"></div>
+    <div class="particles" id="particles"></div>
+
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon">N</div>
+                <div class="logo-text">NexusHR</div>
+            </div>
+            <div class="user-info">
+                <div class="welcome">
+                    Bienvenido, <span class="user-name" th:text="${usuario.nombre + ' ' + usuario.apellido}">Usuario</span>
+                </div>
+                <a href="/auth/logout" class="btn-logout">Cerrar Sesión</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+        <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+        <div class="dashboard-grid">
+            <!-- Formulario Agregar Empleado -->
+            <div class="card">
+                <h2>Agregar Nuevo Empleado</h2>
+                <form th:action="@{/dashboard/empleados}" method="post" th:object="${nuevoEmpleado}">
+                    <div class="form-group">
+                        <label>Nombre</label>
+                        <input type="text" th:field="*{nombre}" required placeholder="Nombre">
+                    </div>
+                    <div class="form-group">
+                        <label>Apellido</label>
+                        <input type="text" th:field="*{apellido}" required placeholder="Apellido">
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" th:field="*{email}" required placeholder="email@empresa.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Puesto</label>
+                        <input type="text" th:field="*{puesto}" required placeholder="Puesto">
+                    </div>
+                    <div class="form-group">
+                        <label>Departamento</label>
+                        <input type="text" th:field="*{departamento}" placeholder="Departamento">
+                    </div>
+                    <div class="form-group">
+                        <label>Salario</label>
+                        <input type="number" th:field="*{salario}" step="0.01" placeholder="0.00">
+                    </div>
+                    <button type="submit" class="btn-primary">Agregar Empleado</button>
+                </form>
+            </div>
+
+            <!-- Gestión Rápida - ACTUALIZADO CON LINKS -->
+            <div class="card">
+                <h2>Gestión Rápida</h2>
+                <div class="quick-actions">
+                    <a href="/dashboard/reportes" class="action-item">
+                        <div class="action-icon">📊</div>
+                        <div class="action-text">
+                            <h3>Reportes</h3>
+                            <p>Generar reportes de nómina</p>
+                        </div>
+                    </a>
+                    
+                    <a href="/dashboard/gestion" class="action-item">
+                        <div class="action-icon">👥</div>
+                        <div class="action-text">
+                            <h3>Gestión</h3>
+                            <p>Administrar departamentos</p>
+                        </div>
+                    </a>
+                    
+                    <a href="/dashboard/seguridad" class="action-item">
+                        <div class="action-icon">🔒</div>
+                        <div class="action-text">
+                            <h3>Seguridad</h3>
+                            <p>Configurar permisos</p>
+                        </div>
+                    </a>
+
+                    <a href="/dashboard/estadisticas" class="action-item">
+                        <div class="action-icon">📈</div>
+                        <div class="action-text">
+                            <h3>Estadísticas</h3>
+                            <p>Ver métricas actuales</p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lista de Empleados CON BÚSQUEDA -->
+        <div class="employees-section">
+            <div class="section-header">
+                <h2 class="section-title">Lista de Empleados</h2>
+                <div class="employees-count" th:text="${(empleados != null ? empleados.size() : 0) + ' empleados'}">0 empleados</div>
+            </div>
+
+            <!-- Barra de Búsqueda - NUEVO -->
+            <div class="search-container">
+                <input type="text" id="searchInput" class="search-input" placeholder="Buscar empleado por nombre, email o departamento...">
+                <div class="search-icon" onclick="searchEmployees()">
+                    <i class="fas fa-search"></i>
+                </div>
+            </div>
+
+            <div th:if="${empleados == null or empleados.empty}" class="empty-state">
+                <i>👥</i>
+                <h3>No hay empleados registrados</h3>
+                <p>Agrega el primer empleado usando el formulario superior</p>
+            </div>
+
+            <table th:if="${empleados != null and not empleados.empty}" class="employees-table" id="employeesTable">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Email</th>
+                        <th>Puesto</th>
+                        <th>Departamento</th>
+                        <th>Salario</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="empleado : ${empleados}">
+                        <td th:text="${empleado.nombre + ' ' + empleado.apellido}"></td>
+                        <td th:text="${empleado.email}"></td>
+                        <td th:text="${empleado.puesto}"></td>
+                        <td th:text="${empleado.departamento}"></td>
+                        <td th:text="${empleado.salario != null} ? '€' + ${#numbers.formatDecimal(empleado.salario, 1, 2)} : 'N/A'"></td>
+                        <td>
+                            <span class="status-active">ACTIVO</span>
+                        </td>
+                        <td>
+                            <form th:action="@{/dashboard/empleados/{id}/eliminar(id=${empleado.id})}" method="post" style="display: inline;">
+                                <button type="submit" class="btn-danger" onclick="return confirm('¿Eliminar empleado?')">Eliminar</button>
+                            </form>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Crear partículas dinámicas para dashboard
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const particleCount = 12;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                
+                const size = Math.random() * 15 + 5;
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+                
+                particle.style.left = Math.random() * 100 + 'vw';
+                particle.style.top = Math.random() * 100 + 'vh';
+                
+                particle.style.animationDelay = Math.random() * 20 + 's';
+                particle.style.animationDuration = (Math.random() * 20 + 10) + 's';
+                particle.style.opacity = Math.random() * 0.15 + 0.05;
+                
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // Función de búsqueda - NUEVO
+        function searchEmployees() {
+            const input = document.getElementById('searchInput');
+            const filter = input.value.toLowerCase();
+            const table = document.getElementById('employeesTable');
+            const tr = table.getElementsByTagName('tr');
+            
+            for (let i = 1; i < tr.length; i++) {
+                const tdNombre = tr[i].getElementsByTagName('td')[0];
+                const tdEmail = tr[i].getElementsByTagName('td')[1];
+                const tdDepartamento = tr[i].getElementsByTagName('td')[3];
+                
+                if (tdNombre || tdEmail || tdDepartamento) {
+                    const txtValueNombre = tdNombre.textContent || tdNombre.innerText;
+                    const txtValueEmail = tdEmail.textContent || tdEmail.innerText;
+                    const txtValueDepto = tdDepartamento.textContent || tdDepartamento.innerText;
+                    
+                    if (txtValueNombre.toLowerCase().indexOf(filter) > -1 || 
+                        txtValueEmail.toLowerCase().indexOf(filter) > -1 ||
+                        txtValueDepto.toLowerCase().indexOf(filter) > -1) {
+                        tr[i].style.display = '';
+                    } else {
+                        tr[i].style.display = 'none';
+                    }
+                }
+            }
+        }
+
+        // Búsqueda en tiempo real
+        document.getElementById('searchInput').addEventListener('keyup', searchEmployees);
+
+        document.addEventListener('DOMContentLoaded', function() {
+            createParticles();
+            
+            // Mensaje al cerrar sesión
+            const logoutBtn = document.querySelector('.btn-logout');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', function(e) {
+                    if (!confirm('¿Estás seguro de que quieres cerrar sesión?')) {
+                        e.preventDefault();
+                    }
+                });
+            }
+
+            // Efectos en inputs
+            const inputs = document.querySelectorAll('input');
+            inputs.forEach(input => {
+                input.addEventListener('focus', function() {
+                    this.style.transform = 'translateY(-2px)';
+                    this.style.boxShadow = '0 5px 15px rgba(26, 42, 108, 0.2)';
+                });
+                
+                input.addEventListener('blur', function() {
+                    this.style.transform = 'translateY(0)';
+                    this.style.boxShadow = 'none';
+                });
+            });
+
+            // Efectos en botones de acción
+            const actionItems = document.querySelectorAll('.action-item');
+            actionItems.forEach(item => {
+                item.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-5px)';
+                });
+                item.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                });
+            });
+        });
+    </script>
+</body>
+</html>

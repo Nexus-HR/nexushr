@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión - NexusHR</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            color: #333;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .animated-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            background: linear-gradient(-45deg, #1a2a6c, #2a3a7c, #3a4a8c, #4a5a9c);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: floatAround 20s infinite linear;
+        }
+
+        @keyframes floatAround {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            100% { transform: translate(100px, 100px) rotate(360deg); }
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px 40px;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            position: relative;
+            z-index: 10;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #ff7e5f, #feb47b);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-weight: bold;
+            color: white;
+            font-size: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .logo-text {
+            font-size: 28px;
+            font-weight: 800;
+            color: #1a2a6c;
+            letter-spacing: 0.5px;
+        }
+
+        .user-info {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .welcome {
+            color: #666;
+        }
+
+        .user-name {
+            font-weight: bold;
+            color: #1a2a6c;
+        }
+
+        .btn-logout {
+            background: linear-gradient(135deg, #ff6b6b, #ff5252);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+
+        .btn-logout:hover {
+            background: linear-gradient(135deg, #ff5252, #ff6b6b);
+            transform: translateY(-2px);
+        }
+
+        .btn-back {
+            background: linear-gradient(135deg, #64748b, #475569);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            display: inline-block;
+            margin-right: 15px;
+        }
+
+        .btn-back:hover {
+            background: linear-gradient(135deg, #475569, #64748b);
+            transform: translateY(-2px);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+            position: relative;
+            z-index: 5;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .card h2 {
+            color: #1a2a6c;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 10px;
+        }
+
+        .departments-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .department-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid #1a2a6c;
+        }
+
+        .department-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .department-name {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #1a2a6c;
+        }
+
+        .employee-count {
+            background: #1a2a6c;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8em;
+        }
+
+        .employees-list {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .employee-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #f1f3f4;
+        }
+
+        .employee-info h4 {
+            margin: 0;
+            color: #333;
+            font-size: 0.9em;
+        }
+
+        .employee-info p {
+            margin: 0;
+            color: #666;
+            font-size: 0.8em;
+        }
+
+        .employee-salary {
+            color: #1a2a6c;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        .empty-dept {
+            text-align: center;
+            color: #666;
+            padding: 20px;
+            font-style: italic;
+        }
+
+        .search-container {
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 45px 12px 15px;
+            border: 2px solid #e1e1e1;
+            border-radius: 25px;
+            font-size: 0.9em;
+            background: #f8f9fa;
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #64748b;
+        }
+
+        @media (max-width: 768px) {
+            .departments-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="animated-bg"></div>
+    <div class="particles" id="particles"></div>
+
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon">N</div>
+                <div class="logo-text">NexusHR</div>
+            </div>
+            <div class="user-info">
+                <div class="welcome">
+                    Bienvenido, <span class="user-name" th:text="${usuario.nombre + ' ' + usuario.apellido}">Usuario</span>
+                </div>
+                <a href="/dashboard" class="btn-back">← Volver</a>
+                <a href="/auth/logout" class="btn-logout">Cerrar Sesión</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="card">
+            <h2><i class="fas fa-sitemap"></i> Gestión por Departamentos</h2>
+            
+            <div class="search-container">
+                <input type="text" class="search-input" placeholder="Buscar empleado o departamento..." id="searchDept">
+                <div class="search-icon">
+                    <i class="fas fa-search"></i>
+                </div>
+            </div>
+
+            <div class="departments-grid">
+                <div th:each="departamento : ${departamentos}" class="department-card">
+                    <div class="department-header">
+                        <div class="department-name" th:text="${departamento}">Departamento</div>
+                        <div class="employee-count" th:text="${empleadosPorDepartamento.get(departamento).size() + ' emp.'}">0 emp.</div>
+                    </div>
+                    <div class="employees-list">
+                        <div th:each="empleado : ${empleadosPorDepartamento.get(departamento)}" class="employee-item">
+                            <div class="employee-info">
+                                <h4 th:text="${empleado.nombre + ' ' + empleado.apellido}">Nombre Empleado</h4>
+                                <p th:text="${empleado.puesto}">Puesto</p>
+                            </div>
+                            <div class="employee-salary" th:text="${empleado.salario != null} ? '€' + ${#numbers.formatDecimal(empleado.salario, 1, 2)} : 'N/A'">€0.00</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Departamento vacío de ejemplo -->
+                <div class="department-card">
+                    <div class="department-header">
+                        <div class="department-name">Marketing</div>
+                        <div class="employee-count">0 emp.</div>
+                    </div>
+                    <div class="empty-dept">
+                        <i class="fas fa-users" style="font-size: 2em; margin-bottom: 10px; opacity: 0.5;"></i>
+                        <p>No hay empleados en este departamento</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2><i class="fas fa-plus-circle"></i> Agregar Nuevo Departamento</h2>
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 15px; align-items: end;">
+                <div>
+                    <label style="display: block; margin-bottom: 8px; font-weight: bold; color: #1a2a6c;">Nombre del Departamento</label>
+                    <input type="text" placeholder="Ingresa el nombre del nuevo departamento" style="width: 100%; padding: 12px; border: 2px solid #e1e1e1; border-radius: 8px;">
+                </div>
+                <button style="background: linear-gradient(135deg, #1a2a6c, #2a3a7c); color: white; padding: 12px 20px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">
+                    Crear Departamento
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            for (let i = 0; i < 10; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.width = Math.random() * 15 + 5 + 'px';
+                particle.style.height = particle.style.width;
+                particle.style.left = Math.random() * 100 + 'vw';
+                particle.style.top = Math.random() * 100 + 'vh';
+                particle.style.animationDelay = Math.random() * 20 + 's';
+                particle.style.animationDuration = (Math.random() * 20 + 10) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // Búsqueda en departamentos
+        document.getElementById('searchDept').addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const departments = document.querySelectorAll('.department-card');
+            
+            departments.forEach(dept => {
+                const deptName = dept.querySelector('.department-name').textContent.toLowerCase();
+                const employees = dept.querySelectorAll('.employee-item');
+                let hasMatch = deptName.includes(searchTerm);
+                
+                if (!hasMatch) {
+                    employees.forEach(emp => {
+                        const empName = emp.querySelector('h4').textContent.toLowerCase();
+                        if (empName.includes(searchTerm)) {
+                            hasMatch = true;
+                        }
+                    });
+                }
+                
+                dept.style.display = hasMatch ? 'block' : 'none';
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            createParticles();
+        });
+    </script>
+</body>
+</html>

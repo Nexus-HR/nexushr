@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reportes - NexusHR</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            color: #333;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .animated-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            background: linear-gradient(-45deg, #1a2a6c, #2a3a7c, #3a4a8c, #4a5a9c);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: floatAround 20s infinite linear;
+        }
+
+        @keyframes floatAround {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            100% { transform: translate(100px, 100px) rotate(360deg); }
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px 40px;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            position: relative;
+            z-index: 10;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #ff7e5f, #feb47b);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-weight: bold;
+            color: white;
+            font-size: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .logo-text {
+            font-size: 28px;
+            font-weight: 800;
+            color: #1a2a6c;
+            letter-spacing: 0.5px;
+        }
+
+        .user-info {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .welcome {
+            color: #666;
+        }
+
+        .user-name {
+            font-weight: bold;
+            color: #1a2a6c;
+        }
+
+        .btn-logout {
+            background: linear-gradient(135deg, #ff6b6b, #ff5252);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+
+        .btn-logout:hover {
+            background: linear-gradient(135deg, #ff5252, #ff6b6b);
+            transform: translateY(-2px);
+        }
+
+        .btn-back {
+            background: linear-gradient(135deg, #64748b, #475569);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            display: inline-block;
+            margin-right: 15px;
+        }
+
+        .btn-back:hover {
+            background: linear-gradient(135deg, #475569, #64748b);
+            transform: translateY(-2px);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+            position: relative;
+            z-index: 5;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .card h2 {
+            color: #1a2a6c;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 10px;
+        }
+
+        .real-data-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .data-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            border-left: 4px solid #1a2a6c;
+        }
+
+        .data-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #1a2a6c;
+            margin: 10px 0;
+        }
+
+        .data-label {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .performance-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .performance-table th,
+        .performance-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #e1e1e1;
+        }
+
+        .performance-table th {
+            background: #f8f9fa;
+            font-weight: bold;
+            color: #1a2a6c;
+        }
+
+        .performance-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #1a2a6c;
+            transition: width 0.3s ease;
+        }
+
+        .btn-export {
+            background: linear-gradient(135deg, #1a2a6c, #2a3a7c);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.9em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-export:hover {
+            background: linear-gradient(135deg, #2a3a7c, #3a4a8c);
+            transform: translateY(-2px);
+        }
+
+        /* NUEVOS ESTILOS PARA TAREAS */
+        .tareas-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .tareas-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .tarea-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            border-left: 4px solid #1a2a6c;
+            transition: all 0.3s ease;
+        }
+
+        .tarea-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .tarea-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+
+        .tarea-title {
+            font-weight: bold;
+            color: #1a2a6c;
+            margin: 0;
+        }
+
+        .tarea-prioridad {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+
+        .prioridad-alta { background: #ffe6e6; color: #d63031; }
+        .prioridad-media { background: #fff4e6; color: #e17055; }
+        .prioridad-baja { background: #e6f7ff; color: #0984e3; }
+
+        .tarea-estado {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        .estado-completada { background: #d4edda; color: #155724; }
+        .estado-progreso { background: #fff3cd; color: #856404; }
+        .estado-pendiente { background: #f8d7da; color: #721c24; }
+
+        .tarea-progreso {
+            margin-top: 15px;
+        }
+
+        .progreso-bar {
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 5px;
+        }
+
+        .progreso-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #1a2a6c, #2a3a7c);
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        .progreso-text {
+            font-size: 0.8em;
+            color: #666;
+            text-align: right;
+        }
+
+        /* Selector múltiple de tareas */
+        .tarea-selector {
+            border: 2px dashed #e1e1e1;
+            border-radius: 10px;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+
+        .tarea-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            margin: 5px 0;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tarea-option:hover {
+            background: #e3f2fd;
+            transform: translateX(5px);
+        }
+
+        .tarea-option input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+        }
+
+        .tarea-info {
+            flex: 1;
+        }
+
+        .tarea-nombre {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .tarea-departamento {
+            font-size: 0.8em;
+            color: #666;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #1a2a6c;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e1e1;
+            border-radius: 8px;
+            font-size: 0.9em;
+            background: #f8f9fa;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #1a2a6c;
+            background: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(26, 42, 108, 0.2);
+        }
+
+        .assigned-tasks-list {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #e1e1e1;
+            border-radius: 8px;
+            padding: 15px;
+        }
+
+        .employee-task-item {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #f1f3f4;
+        }
+
+        .task-tag {
+            background: #1a2a6c;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            display: inline-block;
+            margin: 2px;
+        }
+
+        @media (max-width: 768px) {
+            .real-data-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .tareas-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="animated-bg"></div>
+    <div class="particles" id="particles"></div>
+
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon">N</div>
+                <div class="logo-text">NexusHR</div>
+            </div>
+            <div class="user-info">
+                <div class="welcome">
+                    Bienvenido, <span class="user-name" th:text="${usuario.nombre + ' ' + usuario.apellido}">Usuario</span>
+                </div>
+                <a href="/dashboard" class="btn-back">← Volver</a>
+                <a href="/auth/logout" class="btn-logout">Cerrar Sesión</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="card">
+            <h2><i class="fas fa-chart-bar"></i> Reportes de Desempeño</h2>
+            
+            <!-- Datos Reales de los Empleados -->
+            <div class="real-data-grid">
+                <div class="data-card">
+                    <div class="data-value" th:text="${empleados != null ? empleados.size() : 0}">0</div>
+                    <div class="data-label">Total Empleados</div>
+                </div>
+                <div class="data-card">
+                    <div class="data-value">€<span th:text="${#numbers.formatDecimal(estadisticas.salarioTotal, 1, 2)}">0</span></div>
+                    <div class="data-label">Nómina Total</div>
+                </div>
+                <div class="data-card">
+                    <div class="data-value">€<span th:text="${#numbers.formatDecimal(estadisticas.salarioPromedio, 1, 2)}">0</span></div>
+                    <div class="data-label">Salario Promedio</div>
+                </div>
+                <div class="data-card">
+                    <div class="data-value" th:text="${#aggregates.sum(empleadosConTareas.![tareasCompletadas])}">0</div>
+                    <div class="data-label">Tareas Completadas</div>
+                </div>
+            </div>
+
+            <!-- Tabla de Desempeño Real -->
+            <h3 style="color: #1a2a6c; margin: 30px 0 20px 0;">Desempeño por Empleado</h3>
+            <table class="performance-table">
+                <thead>
+                    <tr>
+                        <th>Empleado</th>
+                        <th>Departamento</th>
+                        <th>Tareas Completadas</th>
+                        <th>Desempeño</th>
+                        <th>Salario</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="empData : ${empleadosConTareas}">
+                        <td th:text="${empData.empleado.nombre + ' ' + empData.empleado.apellido}"></td>
+                        <td th:text="${empData.empleado.departamento != null} ? ${empData.empleado.departamento} : 'Sin asignar'"></td>
+                        <td>
+                            <span th:text="${empData.tareasCompletadas}"></span>/
+                            <span th:text="${empData.tareasTotales}"></span>
+                            <div class="progress-bar">
+                                <div class="progress-fill" th:style="'width: ' + ${(empData.tareasTotales > 0 ? (empData.tareasCompletadas / empData.tareasTotales * 100) : 0) + '%;'}"></div>
+                            </div>
+                        </td>
+                        <td>
+                            <span th:text="${#numbers.formatDecimal(empData.desempenio, 1, 1) + '%'}"></span>
+                            <div class="progress-bar">
+                                <div class="progress-fill" th:style="'width: ' + ${empData.desempenio + '%;'} 
+                                    + '; background: ' + ${empData.desempenio >= 80 ? '#51cf66' : (empData.desempenio >= 60 ? '#feb47b' : '#ff6b6b')}"></div>
+                            </div>
+                        </td>
+                        <td th:text="${empData.empleado.salario != null} ? '€' + ${#numbers.formatDecimal(empData.empleado.salario, 1, 2)} : 'N/A'"></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div style="display: flex; gap: 15px; margin-top: 30px; justify-content: center;">
+                <button class="btn-export" onclick="exportarExcel()">
+                    <i class="fas fa-file-excel"></i> Exportar a Excel
+                </button>
+                <button class="btn-export" onclick="exportarPDF()" style="background: linear-gradient(135deg, #dc3545, #c82333);">
+                    <i class="fas fa-file-pdf"></i> Exportar a PDF
+                </button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2><i class="fas fa-tasks"></i> Gestión de Tareas</h2>
+            <div class="tareas-container">
+                <div>
+                    <h3 style="color: #1a2a6c; margin-bottom: 15px;">Asignar Tareas</h3>
+                    <div class="form-group">
+                        <label>Seleccionar Empleado</label>
+                        <select id="empleadoSelect" style="width: 100%; padding: 10px; border: 2px solid #e1e1e1; border-radius: 8px;">
+                            <option value="">-- Seleccionar Empleado --</option>
+                            <option th:each="empleado : ${empleados}" th:value="${empleado.id}" th:text="${empleado.nombre + ' ' + empleado.apellido}"></option>
+                        </select>
+                    </div>
+                    
+                    <div class="tarea-selector">
+                        <h4 style="color: #1a2a6c; margin-bottom: 15px;">Seleccionar Tareas</h4>
+                        <div th:each="tarea : ${tareasDisponibles}" class="tarea-option">
+                            <input type="checkbox" th:id="${'tarea_' + tareaStat.index}" th:value="${tarea.nombre}">
+                            <div class="tarea-info">
+                                <div class="tarea-nombre" th:text="${tarea.nombre}"></div>
+                                <div class="tarea-departamento">
+                                    <span th:text="${tarea.departamento}"></span> | 
+                                    <span th:class="${'tarea-prioridad prioridad-' + tarea.prioridad.toLowerCase()}" 
+                                          th:text="${tarea.prioridad}"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button class="btn-export" onclick="asignarTareas()" style="width: 100%; margin-top: 15px;">
+                        <i class="fas fa-plus"></i> Asignar Tareas Seleccionadas
+                    </button>
+                </div>
+                
+                <div>
+                    <h3 style="color: #1a2a6c; margin-bottom: 15px;">Tareas por Empleado</h3>
+                    <div class="assigned-tasks-list">
+                        <div th:each="empData : ${empleadosConTareas}" class="employee-task-item">
+                            <strong th:text="${empData.empleado.nombre + ' ' + empData.empleado.apellido}"></strong>
+                            <div style="font-size: 0.9em; color: #666; margin-bottom: 5px;">
+                                <span th:text="'Tareas: ' + empData.tareasCompletadas + '/' + empData.tareasTotales"></span>
+                                <span th:text="' | Desempeño: ' + #numbers.formatDecimal(empData.desempenio, 1, 1) + '%'"></span>
+                            </div>
+                            <div th:each="tarea : ${empData.tareas}">
+                                <span class="task-tag" 
+                                      th:class="${'task-tag ' + (tarea.estado == 'COMPLETADA' ? 'estado-completada' : 'estado-progreso')}"
+                                      th:text="${tarea.nombre + ' (' + tarea.progreso + '%)'}"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sección de Tareas Detalladas -->
+        <div class="card">
+            <h2><i class="fas fa-list-check"></i> Detalle de Tareas</h2>
+            <div class="tareas-grid">
+                <div th:each="empData : ${empleadosConTareas}" class="tarea-card">
+                    <div class="tarea-header">
+                        <div class="tarea-title" th:text="${empData.empleado.nombre + ' ' + empData.empleado.apellido}"></div>
+                        <div th:class="${'tarea-prioridad prioridad-' + (empData.desempenio >= 80 ? 'alta' : (empData.desempenio >= 60 ? 'media' : 'baja'))}"
+                             th:text="${#numbers.formatDecimal(empData.desempenio, 1, 1) + '%'}"></div>
+                    </div>
+                    <div style="color: #666; font-size: 0.9em; margin-bottom: 15px;" 
+                         th:text="${empData.empleado.departamento != null} ? ${empData.empleado.departamento} : 'Sin departamento'"></div>
+                    
+                    <div th:each="tarea : ${empData.tareas}">
+                        <div style="margin-bottom: 10px;">
+                            <div style="display: flex; justify-content: between; align-items: center; margin-bottom: 5px;">
+                                <span style="font-weight: bold;" th:text="${tarea.nombre}"></span>
+                                <span th:class="${'tarea-estado ' + (tarea.estado == 'COMPLETADA' ? 'estado-completada' : 'estado-progreso')}"
+                                      th:text="${tarea.estado}"></span>
+                            </div>
+                            <div class="tarea-progreso">
+                                <div class="progreso-bar">
+                                    <div class="progreso-fill" th:style="'width: ' + ${tarea.progreso} + '%;'"></div>
+                                </div>
+                                <div class="progreso-text" th:text="${tarea.progreso + '% completado'}"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            for (let i = 0; i < 10; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.width = Math.random() * 15 + 5 + 'px';
+                particle.style.height = particle.style.width;
+                particle.style.left = Math.random() * 100 + 'vw';
+                particle.style.top = Math.random() * 100 + 'vh';
+                particle.style.animationDelay = Math.random() * 20 + 's';
+                particle.style.animationDuration = (Math.random() * 20 + 10) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        function asignarTareas() {
+            const empleadoSelect = document.getElementById('empleadoSelect');
+            const tareasSeleccionadas = [];
+            
+            // Obtener tareas seleccionadas
+            document.querySelectorAll('input[type="checkbox"]:checked').forEach(checkbox => {
+                tareasSeleccionadas.push(checkbox.value);
+            });
+            
+            if (!empleadoSelect.value) {
+                alert('Por favor selecciona un empleado');
+                return;
+            }
+            
+            if (tareasSeleccionadas.length === 0) {
+                alert('Por favor selecciona al menos una tarea');
+                return;
+            }
+            
+            const empleadoNombre = empleadoSelect.options[empleadoSelect.selectedIndex].text;
+            alert('Tareas asignadas a: ' + empleadoNombre + '\nTareas: ' + tareasSeleccionadas.join(', '));
+            
+            // Limpiar selección
+            document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+                checkbox.checked = false;
+            });
+            empleadoSelect.value = '';
+        }
+
+        function exportarExcel() {
+            alert('Reporte exportado a Excel exitosamente');
+        }
+
+        function exportarPDF() {
+            alert('Reporte exportado a PDF exitosamente');
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            createParticles();
+        });
+    </script>
+</body>
+</html>
