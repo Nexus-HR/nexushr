@@ -551,7 +551,7 @@
             <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
             <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
             
-            <form th:action="@{/auth/registro}" method="post" th:object="${usuario}">
+            <form th:action="@{src/main/resources/templates/auth/registro}" method="post" th:object="${usuario}">
                 <div class="name-group">
                     <div class="form-group">
                         <label for="nombre">Nombre</label>
@@ -598,7 +598,7 @@
                 <button type="submit">Crear cuenta</button>
                 
                 <div class="login-link">
-                    ¿Ya tienes una cuenta? <a href="/auth/login">Inicia sesión</a>
+                    ¿Ya tienes una cuenta? <a href="src/main/resources/templates/auth/login">Inicia sesión</a>
                 </div>
             </form>
         </div>
